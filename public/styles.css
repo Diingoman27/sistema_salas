@@ -1,0 +1,116 @@
+:root{
+  --bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  --card: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+  --muted: #a2a2d0;
+  --accent: #00d4ff;
+  --secondary: #00ff88;
+  --glass: rgba(255,255,255,0.08);
+  --surface: #0f3460;
+  --radius: 16px;
+  --shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
+  --shadow-hover: 0 12px 40px rgba(0, 212, 255, 0.3);
+}
+
+* {
+  transition: all 0.3s ease;
+}
+
+body {
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  margin: 0;
+  background: var(--bg);
+  color: #e6eef8;
+  -webkit-font-smoothing: antialiased;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.container{max-width:1100px;margin:28px auto;padding:0 20px}
+.site-header{padding:28px 0 8px}
+.header-grid{display:flex;justify-content:space-between;align-items:center}
+.auth{display:flex;gap:8px;align-items:center}
+.brand{margin:0;font-weight:700;font-size:28px;letter-spacing:-0.4px}
+.brand .accent{color:var(--accent)}
+.subtitle{margin:6px 0 0;color:var(--muted);font-size:13px}
+.tabs{display:flex;gap:8px;align-items:center;margin:12px auto 18px}
+.tab{background:transparent;border:0;padding:10px 14px;border-radius:10px;color:var(--muted);cursor:pointer}
+.tab.active{background:linear-gradient(90deg,var(--accent),#5b21b6);color:white}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;align-items:start}
+.card{background: var(--card); padding:18px; border-radius:var(--radius); box-shadow: var(--shadow); border: 1px solid rgba(0, 212, 255, 0.1); transition: all 0.3s ease;}
+.card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+.card.wide{grid-column:1 / -1}
+h2{margin:0 0 12px;font-size:18px}
+.form-inline{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+input,select{background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:10px 12px;color:var(--muted);border-radius:8px;outline:none}
+input:focus,select:focus{box-shadow:0 4px 18px rgba(124,58,237,0.12);border-color:rgba(124,58,237,0.6);color:#e6eef8}
+.btn{padding:10px 14px;border-radius:10px;border:0;background:transparent;color:var(--muted);cursor:pointer; transition: all 0.3s ease;}
+.btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--secondary));color:white;font-weight:600}
+.btn.primary:hover { background: linear-gradient(90deg, var(--secondary), var(--accent)); box-shadow: var(--shadow-hover); }
+.table-wrap{overflow:auto;margin-top:8px;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13px;color:var(--muted)}
+thead th{background:rgba(255,255,255,0.02);text-align:left;padding:10px 12px;color:var(--muted);font-weight:600}
+tbody td{padding:10px 12px;border-top:1px solid rgba(255,255,255,0.02)}
+tbody tr:hover { background: rgba(0, 212, 255, 0.1); transform: scale(1.01); }
+.small{font-size:12px;color:var(--muted)}
+.accent-pill{background:rgba(124,58,237,0.12);color:var(--accent);padding:6px 8px;border-radius:999px;font-weight:600}
+.site-footer{padding:18px 0 40px;color:var(--muted);font-size:13px}
+
+@media (max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .tabs{justify-content:space-between}
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  animation: fadeIn 0.3s ease-in;
+}
+
+.modal-content {
+  background: var(--card);
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 500px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.close {
+  color: var(--muted);
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #e6eef8;
+}
+
+#confirmation-content {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--surface);
+  border-radius: 8px;
+}

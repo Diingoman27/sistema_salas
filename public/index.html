@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reservas de Salas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-grid">
+      <div>
+        <h1 class="brand">Reservas <span class="accent">Salas</span></h1>
+        <p class="subtitle">Gestiona salas, clientes y reservas de forma simple</p>
+      </div>
+      <div class="auth">
+        <span id="user-info" class="small"></span>
+        <button id="btn-login" class="btn" onclick="navigateToLogin()">Iniciar sesión</button>
+        <button id="btn-logout" class="btn" onclick="logout()" style="display:none">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+
+  <nav class="tabs container" role="navigation">
+    <button class="tab active" data-view="clients" onclick="showView('clients')">Clientes</button>
+    <button class="tab" data-view="workers" onclick="showView('workers')">Trabajadores</button>
+    <button class="tab" data-view="rooms" onclick="showView('rooms')">Salas</button>
+    <button class="tab" data-view="reservations" onclick="showView('reservations')">Reservas</button>
+  </nav>
+
+  <main class="container">
+    <section id="view-clients" class="view card">
+      <h2>Clientes</h2>
+      <form id="client-form" class="form-inline" onsubmit="event.preventDefault(); createClient();">
+        <input id="client-name" placeholder="Nombre" required>
+        <input id="client-email" type="email" placeholder="Correo" required>
+        <input id="client-password" type="password" placeholder="Contraseña" required>
+        <input id="client-dept" placeholder="Departamento">
+        <button class="btn primary" type="submit"><i class="fas fa-plus"></i> Crear</button>
+      </form>
+      <div class="table-wrap">
+        <table id="clients-table"><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Departamento</th><th>Reservas</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <section id="view-workers" class="view card">
+      <h2>Trabajadores</h2>
+      <form id="worker-form" class="form-inline" onsubmit="event.preventDefault(); createWorker();">
+        <input id="worker-name" placeholder="Nombre" required>
+        <input id="worker-email" type="email" placeholder="Correo" required>
+        <input id="worker-password" type="password" placeholder="Contraseña" required>
+        <button class="btn primary" type="submit"><i class="fas fa-plus"></i> Crear</button>
+      </form>
+      <div class="table-wrap">
+        <table id="workers-table"><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <section id="view-rooms" class="view card">
+      <h2>Salas</h2>
+      <form id="room-form" class="form-inline" onsubmit="event.preventDefault(); createRoom();">
+        <input id="room-name" placeholder="Nombre" required>
+        <input id="room-capacity" type="number" placeholder="Capacidad" min="1" value="4">
+        <input id="room-res" placeholder="Recursos (coma separada)">
+        <button class="btn primary" type="submit"><i class="fas fa-plus"></i> Crear</button>
+      </form>
+      <div class="table-wrap">
+        <table id="rooms-table"><thead><tr><th>ID</th><th>Nombre</th><th>Capacidad</th><th>Estado</th><th>Días ocupados (30d)</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <section id="view-reservations" class="view card">
+      <h2>Reservas</h2>
+      <form id="res-form" class="form-grid" onsubmit="event.preventDefault(); createReservation();">
+        <select id="res-room" required></select>
+        <select id="res-client" required></select>
+        <input id="res-start" type="datetime-local" required>
+        <input id="res-end" type="datetime-local" required>
+        <input id="res-purpose" placeholder="Propósito">
+        <button class="btn primary" type="submit"><i class="fas fa-calendar-plus"></i> Crear reserva</button>
+      </form>
+
+      <div class="table-wrap">
+        <table id="reservations-table"><thead><tr><th>ID</th><th>Sala</th><th>Cliente</th><th>Inicio</th><th>Fin</th><th>Propósito</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
+  <!-- Modal para edición de clientes -->
+  <div id="edit-client-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('edit-client-modal')">&times;</span>
+      <h3>Editar Cliente</h3>
+      <form id="edit-client-form" onsubmit="event.preventDefault(); updateClient();">
+        <input id="edit-client-id" type="hidden">
+        <input id="edit-client-name" placeholder="Nombre" required>
+        <input id="edit-client-email" type="email" placeholder="Correo" required>
+        <input id="edit-client-dept" placeholder="Departamento">
+        <button class="btn primary" type="submit"><i class="fas fa-save"></i> Actualizar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para edición de trabajadores -->
+  <div id="edit-worker-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('edit-worker-modal')">&times;</span>
+      <h3>Editar Trabajador</h3>
+      <form id="edit-worker-form" onsubmit="event.preventDefault(); updateWorker();">
+        <input id="edit-worker-id" type="hidden">
+        <input id="edit-worker-name" placeholder="Nombre" required>
+        <input id="edit-worker-email" type="email" placeholder="Correo" required>
+        <button class="btn primary" type="submit"><i class="fas fa-save"></i> Actualizar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para edición de salas -->
+  <div id="edit-room-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('edit-room-modal')">&times;</span>
+      <h3>Editar Sala</h3>
+      <form id="edit-room-form" onsubmit="event.preventDefault(); updateRoom();">
+        <input id="edit-room-id" type="hidden">
+        <input id="edit-room-name" placeholder="Nombre" required>
+        <input id="edit-room-capacity" type="number" placeholder="Capacidad" min="1" required>
+        <input id="edit-room-res" placeholder="Recursos (coma separada)">
+        <button class="btn primary" type="submit"><i class="fas fa-save"></i> Actualizar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para edición de reservas -->
+  <div id="edit-reservation-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('edit-reservation-modal')">&times;</span>
+      <h3>Editar Reserva</h3>
+      <form id="edit-reservation-form" onsubmit="event.preventDefault(); updateReservation();">
+        <input id="edit-reservation-id" type="hidden">
+        <select id="edit-res-room" required></select>
+        <select id="edit-res-client" required></select>
+        <input id="edit-res-start" type="datetime-local" required>
+        <input id="edit-res-end" type="datetime-local" required>
+        <input id="edit-res-purpose" placeholder="Propósito">
+        <button class="btn primary" type="submit"><i class="fas fa-save"></i> Actualizar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación -->
+  <div id="confirmation-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('confirmation-modal')">&times;</span>
+      <h3><i class="fas fa-check-circle" style="color: var(--secondary);"></i> ¡Creado exitosamente!</h3>
+      <div id="confirmation-content"></div>
+      <button class="btn" onclick="closeModal('confirmation-modal')">Cerrar</button>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

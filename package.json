@@ -1,0 +1,28 @@
+{
+  "name": "salas-reservas",
+  "version": "0.1.0",
+  "description": "API cliente-servidor para reserva de salas con MySQL",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.0",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.3.0",
+    "sequelize": "^6.32.1",
+    "swagger-ui-express": "^4.6.3",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "sequelize-cli": "^6.6.5"
+  }
+}
