@@ -27,17 +27,40 @@ function loadAuthFromStorage(){
 }
 
 function updateAuthUI(){
-  if(currentUser){ el('user-info').textContent = `${currentUser.name} (${currentUser.role})`; el('btn-login').style.display='none'; el('btn-logout').style.display='inline-block'; }
-  else { el('user-info').textContent=''; el('btn-login').style.display='inline-block'; el('btn-logout').style.display='none'; }
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const isWorker = currentUser && currentUser.role === 'worker';
+  const isClient = currentUser && currentUser.role === 'client';
+
+  const landing = document.getElementById('landing');
+  const navTabs = document.querySelector('.tabs');
+  const mainContent = document.querySelector('main');
+
+  if (currentUser) {
+    el('user-info').textContent = `${currentUser.name} (${currentUser.role})`;
+    el('btn-login').style.display = 'none';
+    el('btn-logout').style.display = 'inline-block';
+
+    if (landing) landing.style.display = 'none';
+    if (navTabs) navTabs.style.display = 'flex';
+    if (mainContent) mainContent.style.display = 'block';
+  } else {
+    el('user-info').textContent = '';
+    el('btn-login').style.display = 'inline-block';
+    el('btn-logout').style.display = 'none';
+
+    if (landing) landing.style.display = 'flex';
+    if (navTabs) navTabs.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'none';
+  }
+
   // control visibility of forms based on role
-  const isAdmin = currentUser && currentUser.role==='admin';
-  const isWorker = currentUser && currentUser.role==='worker';
   document.querySelectorAll('form').forEach(f => {
     // client-form, worker-form, room-form only for admin
     if(f.id==='client-form' || f.id==='worker-form' || f.id==='room-form') f.style.display = isAdmin ? 'flex' : 'none';
     // res-form only for worker or admin
     if(f.id==='res-form') f.style.display = (isWorker || isAdmin) ? 'grid' : 'none';
   });
+
   // Hide workers tab if not admin
   const workersTab = document.querySelector('button[data-view="workers"]');
   if(workersTab) workersTab.style.display = isAdmin ? 'inline-block' : 'none';
@@ -142,15 +165,46 @@ async function computeRoomStats(rooms, reservations){
 }
 
 async function loadAll(){
-  [clients, rooms, reservations] = await Promise.all([
-    fetch(api + '/clients', { headers: authHeaders() }).then(r=>r.json()),
-    fetch(api + '/rooms', { headers: authHeaders() }).then(r=>r.json()),
-    fetch(api + '/reservations', { headers: authHeaders() }).then(r=>r.json())
-  ]);
-  if(currentUser && currentUser.role === 'admin'){
-    workers = await fetch(api + '/users', { headers: authHeaders() }).then(r=>r.json());
-  } else {
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const isWorker = currentUser && currentUser.role === 'worker';
+  const isClient = currentUser && currentUser.role === 'client';
+
+  // Only fetch what this role is allowed to see
+  if (isClient) {
+    // Clients only see their own reservations
+    reservations = await fetch(api + '/reservations', { headers: authHeaders() }).then(r=>r.json());
+    clients = [];
+    rooms = [];
     workers = [];
+
+    // Calculate client tier / plan based on number of active reservations
+    const reservationCount = reservations.length;
+    let tier = 'Bronce';
+    if (reservationCount >= 6) tier = 'Diamante';
+    else if (reservationCount >= 3) tier = 'Plata';
+
+    const summaryEl = el('client-summary');
+    if (summaryEl) {
+      summaryEl.style.display = 'block';
+      summaryEl.innerHTML = `<strong>Tu plan:</strong> ${tier} &nbsp;|&nbsp; <strong>Reservas activas:</strong> ${reservationCount}`;
+    }
+  } else {
+    const summaryEl = el('client-summary');
+    if (summaryEl) {
+      summaryEl.style.display = 'none';
+      summaryEl.innerHTML = '';
+    }
+
+    [clients, rooms, reservations] = await Promise.all([
+      fetch(api + '/clients', { headers: authHeaders() }).then(r=>r.json()),
+      fetch(api + '/rooms', { headers: authHeaders() }).then(r=>r.json()),
+      fetch(api + '/reservations', { headers: authHeaders() }).then(r=>r.json())
+    ]);
+    if(isAdmin){
+      workers = await fetch(api + '/users', { headers: authHeaders() }).then(r=>r.json());
+    } else {
+      workers = [];
+    }
   }
 
   // CLIENTS view: list clients and their upcoming reservations
@@ -160,7 +214,7 @@ async function loadAll(){
     const upcoming = userRes.map(r => `${r.roomId} (${formatDate(r.startTime)}→${formatDate(r.endTime)})`).join('<br>') || '<span class="small">Sin reservas</span>';
     const isAdmin = currentUser && currentUser.role === 'admin';
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${c.id}</td><td>${c.name}</td><td>${c.email}</td><td>${c.department||''}</td><td>${upcoming}</td><td>${isAdmin ? `<button class="btn" onclick="editClient(${c.id})"><i class="fas fa-edit"></i> Editar</button> <button class="btn danger" onclick="deleteItem('clients', ${c.id})"><i class="fas fa-trash"></i> Eliminar</button>` : ''}</td>`;
+    tr.innerHTML = `<td>${c.id}</td><td>${c.name}</td><td>${c.email}</td><td>${c.department||''}</td><td>${c.tier || ''}</td><td>${upcoming}</td><td>${isAdmin ? `<button class="btn" onclick="editClient(${c.id})"><i class="fas fa-edit"></i> Editar</button> <button class="btn danger" onclick="deleteItem('clients', ${c.id})"><i class="fas fa-trash"></i> Eliminar</button>` : ''}</td>`;
     ct.appendChild(tr);
   });
 

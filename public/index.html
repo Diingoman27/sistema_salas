@@ -31,6 +31,14 @@
     <button class="tab" data-view="reservations" onclick="showView('reservations')">Reservas</button>
   </nav>
 
+  <section id="landing" class="landing">
+    <div class="landing-inner">
+      <h1>Reservas Salas</h1>
+      <p class="landing-subtitle">Administra salas y reservas de manera fácil y ordenada.</p>
+      <button class="btn primary" onclick="navigateToLogin()">Iniciar sesión</button>
+    </div>
+  </section>
+
   <main class="container">
     <section id="view-clients" class="view card">
       <h2>Clientes</h2>
@@ -42,7 +50,7 @@
         <button class="btn primary" type="submit"><i class="fas fa-plus"></i> Crear</button>
       </form>
       <div class="table-wrap">
-        <table id="clients-table"><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Departamento</th><th>Reservas</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+        <table id="clients-table"><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Departamento</th><th>Plan</th><th>Reservas</th><th>Acciones</th></tr></thead><tbody></tbody></table>
       </div>
     </section>
 
@@ -74,6 +82,7 @@
 
     <section id="view-reservations" class="view card">
       <h2>Reservas</h2>
+      <div id="client-summary" class="client-summary" style="margin-bottom:16px; display:none;"></div>
       <form id="res-form" class="form-grid" onsubmit="event.preventDefault(); createReservation();">
         <select id="res-room" required></select>
         <select id="res-client" required></select>

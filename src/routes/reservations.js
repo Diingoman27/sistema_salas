@@ -9,11 +9,16 @@ const permit = require('../middleware/roles');
 
 // List
 router.get('/', auth, permit('admin','worker','client'), asyncHandler(async (req, res) => {
-  const items = await Reservation.findAll({ include: [Room, Client], order: [['startTime', 'ASC']] });
-  // clients should only see their reservations unless admin/worker
-  if (req.user.role === 'client'){
-    return res.json(items.filter(it => it.clientId === req.user.id));
+  const where = { startTime: { [Op.gte]: new Date() } }; // only active (future) reservations
+
+  // If this is a client account, filter by their clientId.
+  // The JWT payload can provide either clientId (preferred) or id (fallback).
+  if (req.user.role === 'client') {
+    const clientId = req.user.clientId || req.user.id;
+    where.clientId = clientId;
   }
+
+  const items = await Reservation.findAll({ where, include: [Room, Client], order: [['startTime', 'ASC']] });
   res.json(items);
 }));
 
@@ -36,6 +41,7 @@ router.post('/', auth, permit('admin','worker'), [
 
   const { roomId, startTime, endTime } = req.body;
   if (new Date(startTime) >= new Date(endTime)) return res.status(400).json({ error: 'startTime debe ser antes de endTime' });
+  if (new Date(startTime) < new Date()) return res.status(400).json({ error: 'No se pueden crear reservaciones para fechas pasadas' });
 
   const conflicts = await Reservation.findOne({
     where: {
@@ -69,6 +75,7 @@ router.put('/:id', auth, permit('admin','worker'), [
 
   const { roomId, startTime, endTime } = req.body;
   if (startTime && endTime && new Date(startTime) >= new Date(endTime)) return res.status(400).json({ error: 'startTime debe ser antes de endTime' });
+  if (startTime && new Date(startTime) < new Date()) return res.status(400).json({ error: 'No se pueden actualizar reservaciones a fechas pasadas' });
 
   // Check conflicts if roomId or times changed
   if (roomId !== undefined || startTime || endTime) {

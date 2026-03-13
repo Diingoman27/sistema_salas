@@ -8,8 +8,18 @@ const permit = require('../middleware/roles');
 const bcrypt = require('bcryptjs');
 
 router.get('/', auth, permit('admin','worker'), asyncHandler(async (req, res) => {
-  const items = await Client.findAll();
-  res.json(items);
+  const clients = await Client.findAll();
+
+  // Attach reservation count + tier for each client
+  const results = await Promise.all(clients.map(async client => {
+    const reservationCount = await Reservation.count({ where: { clientId: client.id } });
+    let tier = 'Bronce';
+    if (reservationCount >= 6) tier = 'Diamante';
+    else if (reservationCount >= 3) tier = 'Plata';
+    return { ...client.toJSON(), reservationCount, tier };
+  }));
+
+  res.json(results);
 }));
 
 router.get('/:id', auth, permit('admin','worker'), param('id').isInt(), asyncHandler(async (req, res) => {
